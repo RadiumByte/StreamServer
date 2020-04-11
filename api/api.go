@@ -64,7 +64,7 @@ func (server *WebServer) Start(errc chan<- error) {
 
 	port := ":8081"
 
-	fmt.Printf("Server is starting on port %d\n", port)
+	fmt.Printf("Server is starting on port %s\n", port)
 	errc <- fasthttp.ListenAndServe(port, router.Handler)
 }
 
