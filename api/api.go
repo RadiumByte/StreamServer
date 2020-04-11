@@ -45,11 +45,14 @@ func (server *WebServer) GetCameras(ctx *fasthttp.RequestCtx) {
 		fmt.Println(string(payload))
 
 		ctx.SetContentType("application/json")
-		ctx.SetBodyString(string(payload))
+		ctx.SetBody(payload)
 
+		fmt.Println("Server status for /get-cameras request: OK")
 		ctx.SetStatusCode(fasthttp.StatusOK)
+		return
 	}
 
+	fmt.Println("Server status for /get-cameras request: NoContent")
 	ctx.SetStatusCode(fasthttp.StatusNoContent)
 }
 
@@ -57,26 +60,51 @@ func (server *WebServer) GetCameras(ctx *fasthttp.RequestCtx) {
 func (server *WebServer) SelectCamera(ctx *fasthttp.RequestCtx) {
 	fmt.Println("API: POST request /select-camera accepted...")
 
-	// TO DO: get JSON from ctx body
+	payload := ctx.PostBody()
 
-	// TO DO: deserialize JSON to model
+	var dataJSON map[string]interface{}
+	if err := json.Unmarshal(payload, &dataJSON); err != nil {
+		fmt.Println("Server status for /get-cameras request: BadRequest")
+		ctx.SetStatusCode(fasthttp.StatusBadRequest)
+		return
+	}
+	name := dataJSON["name"].(string)
+	fmt.Printf("Server got camera name: %s\n", name)
 
-	// TO DO: find camera in App, if not found -> error code
+	err := server.application.SelectCamera(name)
+	if err != nil {
+		fmt.Println("Server status for /get-cameras request: NoContent")
+		ctx.SetStatusCode(fasthttp.StatusNoContent)
+		return
+	}
 
-	// TO DO: return status OK
+	ctx.SetStatusCode(fasthttp.StatusOK)
 }
 
 // AddCamera handles POST request for adding new camera to the server's list
 func (server *WebServer) AddCamera(ctx *fasthttp.RequestCtx) {
 	fmt.Println("API: POST request /add-camera accepted...")
 
-	// TO DO: get JSON from ctx body
+	payload := ctx.PostBody()
+	var dataJSON map[string]interface{}
+	if err := json.Unmarshal(payload, &dataJSON); err != nil {
+		fmt.Println("Server status for /get-cameras request: BadRequest")
+		ctx.SetStatusCode(fasthttp.StatusBadRequest)
+		return
+	}
+	nameCam := dataJSON["name"].(string)
+	typeCam := dataJSON["type"].(int)
+	urlCam := dataJSON["url"].(string)
+	fmt.Printf("Server got camera data: \n Name: %s\n Type: %d\n URL (or device): %s\n", nameCam, typeCam, urlCam)
 
-	// TO DO: deserialize JSON to model
+	newCamera := app.CameraData{
+		Name: nameCam,
+		Type: typeCam,
+		URL:  urlCam}
 
-	// TO DO: create camera in App
+	server.application.AddCamera(newCamera)
 
-	// TO DO: return status OK
+	ctx.SetStatusCode(fasthttp.StatusOK)
 }
 
 // Start adds routes and begins serving
