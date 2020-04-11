@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/RadiumByte/StreamServer/app"
@@ -8,6 +9,12 @@ import (
 	"github.com/buaazp/fasthttprouter"
 	"github.com/valyala/fasthttp"
 )
+
+// GetCamerasJSON describes JSON data for returning camera data
+type GetCamerasJSON struct {
+	CameraTypes []int    `json:"types"`
+	CameraNames []string `json:"names"`
+}
 
 // WebServer is responsible for communication with clients
 type WebServer struct {
@@ -18,13 +25,32 @@ type WebServer struct {
 func (server *WebServer) GetCameras(ctx *fasthttp.RequestCtx) {
 	fmt.Println("API: GET request /get-cameras accepted...")
 
-	// TO DO: get list of cameras for App here
+	cameraList := server.application.GetCameras()
 
-	// TO DO: create JSON for list of cameras
+	if len(cameraList) != 0 {
+		var types []int
+		var names []string
 
-	// TO DO: set JSON as a body of response
+		for i := range cameraList {
+			types = append(types, cameraList[i].Type)
+			names = append(names, cameraList[i].Name)
+		}
 
-	ctx.SetStatusCode(fasthttp.StatusOK)
+		toEncode := &GetCamerasJSON{
+			CameraTypes: types,
+			CameraNames: names}
+
+		payload, _ := json.Marshal(toEncode)
+		fmt.Println("Server response for /get-cameras request: ")
+		fmt.Println(string(payload))
+
+		ctx.SetContentType("application/json")
+		ctx.SetBodyString(string(payload))
+
+		ctx.SetStatusCode(fasthttp.StatusOK)
+	}
+
+	ctx.SetStatusCode(fasthttp.StatusNoContent)
 }
 
 // SelectCamera handles POST request for selecting camera for streaming
