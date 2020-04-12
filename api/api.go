@@ -29,6 +29,7 @@ type WebServer struct {
 
 // GetCameras handles GET request for listing cameras
 func (server *WebServer) GetCameras(ctx *fasthttp.RequestCtx) {
+	fmt.Println("-----------------------------------------")
 	fmt.Println("API: GET request /get-cameras accepted...")
 
 	cameraList := server.application.GetCameras()
@@ -64,6 +65,7 @@ func (server *WebServer) GetCameras(ctx *fasthttp.RequestCtx) {
 
 // GetActive handles GET request for viewing current (active) camera
 func (server *WebServer) GetActive(ctx *fasthttp.RequestCtx) {
+	fmt.Println("-----------------------------------------")
 	fmt.Println("API: GET request /get-active accepted...")
 
 	camera := server.application.GetActive()
@@ -91,6 +93,7 @@ func (server *WebServer) GetActive(ctx *fasthttp.RequestCtx) {
 
 // SelectCamera handles POST request for selecting camera for streaming
 func (server *WebServer) SelectCamera(ctx *fasthttp.RequestCtx) {
+	fmt.Println("-----------------------------------------")
 	fmt.Println("API: POST request /select-camera accepted...")
 
 	payload := ctx.PostBody()
@@ -110,12 +113,14 @@ func (server *WebServer) SelectCamera(ctx *fasthttp.RequestCtx) {
 		ctx.SetStatusCode(fasthttp.StatusNoContent)
 		return
 	}
+	fmt.Println("Server selected camera successfully")
 
 	ctx.SetStatusCode(fasthttp.StatusOK)
 }
 
 // AddCamera handles POST request for adding new camera to the server's list
 func (server *WebServer) AddCamera(ctx *fasthttp.RequestCtx) {
+	fmt.Println("-----------------------------------------")
 	fmt.Println("API: POST request /add-camera accepted...")
 
 	payload := ctx.PostBody()

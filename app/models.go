@@ -5,7 +5,7 @@ type CameraData struct {
 	Name string
 	URL  string
 
-	// 0 - is a /dev camera
+	// 0 - is a /dev/video camera
 	// 1 - is a TCP RTSP camera
 	// 2 - is a UDP RTSP camera
 	Type int

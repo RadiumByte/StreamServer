@@ -3,6 +3,7 @@ package app
 import (
 	"errors"
 	"sync"
+	"time"
 )
 
 // StreamManager is an interface for application's core
@@ -16,6 +17,7 @@ type StreamManager interface {
 // YoutubeAccessLayer is an interface for calling Youtube from Application
 type YoutubeAccessLayer interface {
 	RunRTMP(rtspInput string, cameraType int, rtmpOutput string)
+	RunVLC(deviceInput string, rtspOutput string)
 }
 
 // Application is responsible for all logics and communicates with other layers
@@ -50,7 +52,16 @@ func (a *Application) SelectCamera(name string) error {
 			a.activeCamera.Type = a.cameras[i].Type
 			a.activeCamera.URL = a.cameras[i].URL
 
-			a.Youtube.RunRTMP(a.activeCamera.URL, a.activeCamera.Type, "rtmp://a.rtmp.youtube.com/live2/uq80-f37c-z3c4-7rth")
+			rtspOutput := a.activeCamera.URL
+
+			// If the camera is /dev/video
+			if a.activeCamera.Type == 0 {
+				rtspOutput = "rtsp://localhost:8554/"
+				a.Youtube.RunVLC(a.activeCamera.URL, rtspOutput)
+				time.Sleep(2 * time.Second)
+			}
+
+			a.Youtube.RunRTMP(rtspOutput, a.activeCamera.Type, "rtmp://a.rtmp.youtube.com/live2/uq80-f37c-z3c4-7rth")
 
 			return nil
 		}
