@@ -9,16 +9,24 @@ type YoutubeClient struct {
 }
 
 // RunRTMP coverts input RTSP stream to RTMP stream using FFMPEG
-func (youtube *YoutubeClient) RunRTMP(rtspInput string, rtmpOutput string) {
-	var command string
-	command = "ffmpeg -f lavfi -i anullsrc -rtsp_transport tcp -i " + rtspInput + " -tune zerolatency -vcodec libx264 -t 12:00:00 -pix_fmt + -c:v copy -c:a aac -strict experimental -f flv " + rtmpOutput
-	cmd := exec.Command(command)
-	cmd.Run()
+func (youtube *YoutubeClient) RunRTMP(rtspInput string, cameraType int, rtmpOutput string) {
+	cmdKill := exec.Command("killall", "ffmpeg")
+	cmdKill.Run()
+
+	transport := ""
+
+	if cameraType == 1 {
+		transport = "tcp"
+	} else if cameraType == 2 {
+		transport = "udp"
+	}
+
+	cmdFFMPEG := exec.Command("ffmpeg", "-f", "lavfi", "-i", "anullsrc", "-rtsp_transport", transport, "-i", rtspInput, "-tune", "zerolatency", "-vcodec", "libx264", "-t", "12:00:00", "-pix_fmt", "+", "-c:v", "copy", "-c:a", "aac", "-strict", "experimental", "-f", "flv", rtmpOutput)
+	cmdFFMPEG.Start()
 }
 
 // NewYoutubeClient constructs object of YoutubeClient
 func NewYoutubeClient() (*YoutubeClient, error) {
-
 	res := &YoutubeClient{}
 
 	return res, nil
