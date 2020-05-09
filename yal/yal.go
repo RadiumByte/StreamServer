@@ -47,8 +47,7 @@ func (youtube *YoutubeClient) RunIPRTMP(rtspInput string, cameraType int, rtmpOu
 	}
 
 	cmdFFMPEG := exec.Command("ffmpeg", "-f", "lavfi", "-i", "anullsrc", "-rtsp_transport", transport,
-		"-i", rtspInput, "-tune", "zerolatency", "-vcodec", "libx264", "-t", "12:00:00", "-pix_fmt",
-		"+", "-c:v", "copy", "-c:a", "aac", "-strict", "experimental", "-f", "flv", rtmpOutput)
+		"-i", rtspInput, "-tune", "zerolatency", "-preset", "ultrafast", "-c:v", "copy", "-c:a", "copy", "-f", "flv", rtmpOutput)
 	cmdFFMPEG.Start()
 }
 
