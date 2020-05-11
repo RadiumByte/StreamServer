@@ -118,6 +118,31 @@ func (server *WebServer) SelectCamera(ctx *fasthttp.RequestCtx) {
 	ctx.SetStatusCode(fasthttp.StatusOK)
 }
 
+// SetStreamURL handles POST request for saving broadcast URL
+func (server *WebServer) SetStreamURL(ctx *fasthttp.RequestCtx) {
+	fmt.Println("-----------------------------------------")
+	fmt.Println("API: POST request /stream-url accepted...")
+
+	URL := string(ctx.PostBody())
+
+	fmt.Printf("Server got broadcast URL: %s\n", URL)
+
+	server.application.SetStreamURL(URL)
+
+	ctx.SetStatusCode(fasthttp.StatusOK)
+}
+
+// GetStreamURL handles GET request for taking broadcast URL
+func (server *WebServer) GetStreamURL(ctx *fasthttp.RequestCtx) {
+	fmt.Println("-----------------------------------------")
+	fmt.Println("API: GET request /stream-url accepted...")
+
+	URL := server.application.GetStreamURL()
+
+	ctx.SetBodyString(URL)
+	ctx.SetStatusCode(fasthttp.StatusOK)
+}
+
 // AddCamera handles POST request for adding new camera to the server's list
 func (server *WebServer) AddCamera(ctx *fasthttp.RequestCtx) {
 	fmt.Println("-----------------------------------------")
@@ -154,6 +179,8 @@ func (server *WebServer) Start(errc chan<- error) {
 	router.POST("/select-camera", server.SelectCamera)
 	router.POST("/add-camera", server.AddCamera)
 	router.GET("/get-active", server.GetActive)
+	router.POST("/stream-url", server.SetStreamURL)
+	router.GET("/stream-url", server.GetStreamURL)
 
 	port := ":8081"
 

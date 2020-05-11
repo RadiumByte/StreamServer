@@ -11,6 +11,8 @@ type StreamManager interface {
 	SelectCamera(name string) error
 	GetCameras() []CameraData
 	GetActive() CameraData
+	SetStreamURL(URL string)
+	GetStreamURL() string
 }
 
 // YoutubeAccessLayer is an interface for calling Youtube from Application
@@ -20,8 +22,15 @@ type YoutubeAccessLayer interface {
 	RunVLC(deviceInput string, rtspOutput string)
 }
 
+// RobotAccessLayer is an interface for RAL usage from Application
+type RobotAccessLayer interface {
+	Turn(int)
+	DirectCommand(string)
+}
+
 // Application is responsible for all logics and communicates with other layers
 type Application struct {
+	Robot   RobotAccessLayer
 	Youtube YoutubeAccessLayer
 	errc    chan<- error
 
@@ -29,7 +38,19 @@ type Application struct {
 	cameras      []CameraData
 	activeCamera CameraData
 
+	streamURL string
+
 	camerasMutex sync.Mutex
+}
+
+// SetStreamURL sets new stream URL
+func (a *Application) SetStreamURL(URL string) {
+	a.streamURL = URL
+}
+
+// GetStreamURL gets new stream URL
+func (a *Application) GetStreamURL() string {
+	return a.streamURL
 }
 
 // AddCamera creates new camera in list
@@ -84,11 +105,13 @@ func (a *Application) GetActive() CameraData {
 }
 
 // NewApplication constructs Application
-func NewApplication(youtube YoutubeAccessLayer, errchannel chan<- error) *Application {
+func NewApplication(youtube YoutubeAccessLayer, robot RobotAccessLayer, errchannel chan<- error) *Application {
 	res := &Application{}
 
 	res.Youtube = youtube
 	res.errc = errchannel
+	res.Robot = robot
+
 	res.cameras = []CameraData{}
 	res.activeCamera = CameraData{
 		Name: "",
